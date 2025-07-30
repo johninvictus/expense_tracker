@@ -13,11 +13,13 @@ defmodule ExpenseTracker.Repo.Migrations.CreateBudgets do
 
     create index(:budgets, [:currency])
     create index(:budgets, [:amount])
+    create unique_index(:budgets, [:name])
   end
 
   def down do
     drop index(:budgets, [:currency])
     drop index(:budgets, [:amount])
+    drop unique_index(:budgets, [:name])
     drop table(:budgets)
   end
 end

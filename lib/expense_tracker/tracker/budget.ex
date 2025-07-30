@@ -35,6 +35,8 @@ defmodule ExpenseTracker.Tracker.Budget do
     |> validate_required(@required_field)
     |> validate_inclusion(:currency, ["USD", "EUR", "GBP"])
     |> validate_amount()
+    |> unsafe_validate_unique(:name, ExpenseTracker.Repo)
+    |> unique_constraint(:name)
   end
 
   defp validate_amount(%{valid?: false} = changeset), do: changeset
