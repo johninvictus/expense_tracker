@@ -14,6 +14,7 @@ defmodule ExpenseTracker.Application do
       {Phoenix.PubSub, name: ExpenseTracker.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: ExpenseTracker.Finch},
+      Cldr.Currency,
       # Start a worker by calling: ExpenseTracker.Worker.start_link(arg)
       # {ExpenseTracker.Worker, arg},
       # Start to serve requests, typically the last entry

@@ -11,6 +11,10 @@ config :expense_tracker,
   ecto_repos: [ExpenseTracker.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+config :ex_cldr,
+  default_backend: ExpenseTracker.Cldr,
+  json_library: Jason
+
 # Configures the endpoint
 config :expense_tracker, ExpenseTrackerWeb.Endpoint,
   url: [host: "localhost"],
