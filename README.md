@@ -7,3 +7,7 @@ To start your Phoenix server:
 
 ## usage
 Navigate to http://localhost:4000/budgets to get started
+
+## To check test coverage
+Run `mix coveralls`
+
