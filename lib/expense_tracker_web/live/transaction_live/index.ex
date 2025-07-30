@@ -5,11 +5,16 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
   use ExpenseTrackerWeb, :live_view
 
   alias ExpenseTracker.Tracker
-  alias ExpenseTracker.Tracker.Budget
+  alias ExpenseTracker.Tracker.Transaction
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    {:ok, stream(socket, :transactions, Tracker.list_transactions_by_budget_id(id))}
+    socket =
+      socket
+      |> assign(:budget_id, id)
+      |> stream(:transactions, Tracker.list_transactions_by_budget_id(id))
+
+    {:ok, socket}
   end
 
   @impl true
@@ -20,19 +25,19 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
     |> assign(:page_title, "Edit Budget")
-    |> assign(:budget, Tracker.get_budget!(id))
+    |> assign(:transaction, Tracker.get_transaction!(id))
   end
 
   defp apply_action(socket, :new, _params) do
     socket
-    |> assign(:page_title, "New Budget")
-    |> assign(:budget, %Budget{})
+    |> assign(:page_title, "New Transaction")
+    |> assign(:transaction, %Transaction{})
   end
 
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "Listing Transactions")
-    |> assign(:budget, nil)
+    |> assign(:transaction, nil)
   end
 
   @impl true

@@ -21,7 +21,9 @@ defmodule ExpenseTrackerWeb.Router do
     live "/budgets", BudgetLive.Index, :index
     live "/budgets/new", BudgetLive.Index, :new
     live "/budgets/:id/edit", BudgetLive.Index, :edit
+
     live "/budgets/:id/transactions", TransactionLive.Index, :index
+    live "/budgets/:id/transactions/new", TransactionLive.Index, :new
 
     live "/budgets/:id", BudgetLive.Show, :show
     live "/budgets/:id/show/edit", BudgetLive.Show, :edit
