@@ -2,6 +2,7 @@ defmodule ExpenseTracker.TrackerTest do
   use ExpenseTracker.DataCase
 
   alias ExpenseTracker.Tracker
+  alias ExpenseTracker.Repo
 
   describe "budgets" do
     alias ExpenseTracker.Tracker.Budget
@@ -64,18 +65,91 @@ defmodule ExpenseTracker.TrackerTest do
       budget = budget_fixture()
       assert %Ecto.Changeset{} = Tracker.change_budget(budget)
     end
+
+    test "budget_summary/3 returns a budget summary" do
+      budget = insert(:budget)
+      insert(:transaction, budget: budget)
+
+      summary = Tracker.budget_summary(budget.id, Date.utc_today().year, Date.utc_today().month)
+
+      assert summary.budget_id == budget.id
+      assert summary.budget_limit == Money.new(:USD, "2000.00")
+      assert summary.currency == "USD"
+      assert summary.total_funding == Decimal.new("100.00")
+      assert summary.total_spending == Decimal.new("0")
+      assert summary.transaction_count == 1
+    end
   end
 
   describe "transactions" do
     alias ExpenseTracker.Tracker.Transaction
 
-    import ExpenseTracker.TrackerFixtures
+    test "list_transactions_by_budget_id/1 returns all transactions for a given budget" do
+      transaction = insert(:transaction)
 
-    @invalid_attrs %{type: nil, amount_value: nil, occurred_at: nil, budget_id: nil, description: nil}
+      assert transaction.budget_id
+             |> Tracker.list_transactions_by_budget_id()
+             |> Repo.preload(:budget) == [transaction]
+    end
 
-    test "list_transactions/0 returns all transactions" do
-      transaction = transaction_fixture()
-      assert Tracker.list_transactions() == [transaction]
+    test "list_transactions_by_budget_id_and_year_month/3 returns all transactions for a given budget within a year and month" do
+      transaction = insert(:transaction)
+
+      assert transaction.budget_id
+             |> Tracker.list_transactions_by_budget_id_and_year_month(
+               transaction.occurred_at.year,
+               transaction.occurred_at.month
+             )
+             |> Repo.preload(:budget) == [transaction]
+
+      previous_month = transaction.occurred_at.month - 1
+
+      previous_month =
+        if previous_month < 1, do: 12, else: previous_month
+
+      assert transaction.budget_id
+             |> Tracker.list_transactions_by_budget_id_and_year_month(
+               transaction.occurred_at.year,
+               previous_month
+             ) == []
+    end
+
+    test "get_transaction!/1 returns the transaction with given id" do
+      transaction = insert(:transaction)
+      assert transaction.id |> Tracker.get_transaction!() |> Repo.preload(:budget) == transaction
+
+      assert_raise Ecto.NoResultsError, fn -> Tracker.get_transaction!(transaction.id + 123) end
+    end
+
+    test "create_transaction/1 with valid data creates a transaction" do
+      budget = insert(:budget)
+
+      valid_attrs = %{
+        type: :funding,
+        amount_value: 100,
+        occurred_at: Date.utc_today(),
+        budget_id: budget.id,
+        description: "Test transaction"
+      }
+
+      assert {:ok, %Transaction{} = transaction} = Tracker.create_transaction(valid_attrs)
+      assert transaction.type == :funding
+      assert transaction.amount_value == Decimal.new("100")
+      assert transaction.occurred_at == valid_attrs.occurred_at
+      assert transaction.budget_id == budget.id
+      assert transaction.description == "Test transaction"
+      assert transaction.amount == Money.new(100, "USD")
+    end
+
+    test "create_transaction/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Tracker.create_transaction(%{})
+    end
+
+    test "change_transaction/2 returns a transaction changeset" do
+      %{amount: %Money{amount: amount}} = params = params_for(:transaction)
+
+      assert %Ecto.Changeset{} =
+               Tracker.change_transaction(%Transaction{}, Map.put(params, :amount_value, amount))
     end
   end
 end

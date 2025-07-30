@@ -193,28 +193,6 @@ defmodule ExpenseTracker.Tracker do
   end
 
   @doc """
-  Returns the list of transactions for a given budget within a date range.
-
-  ## Examples
-
-      iex> list_transactions_by_budget_id_and_date_range(1, ~D[2025-01-01], ~D[2025-01-31])
-      [%Transaction{}, ...]
-
-  """
-  @spec list_transactions_by_budget_id_and_date_range(
-          id :: integer(),
-          start_date :: Date.t(),
-          end_date :: Date.t()
-        ) :: [Transaction.t()]
-  def list_transactions_by_budget_id_and_date_range(id, start_date, end_date) do
-    Repo.all(
-      from t in Transaction,
-        where: t.budget_id == ^id and t.occurred_at >= ^start_date and t.occurred_at <= ^end_date,
-        order_by: [desc: t.occurred_at]
-    )
-  end
-
-  @doc """
   Gets a single transaction.
 
   Raises `Ecto.NoResultsError` if the Transaction does not exist.
@@ -264,24 +242,6 @@ defmodule ExpenseTracker.Tracker do
     transaction
     |> change_transaction(attrs)
     |> Repo.update()
-  end
-
-  @doc """
-  Deletes a transaction.
-
-  ## Examples
-
-      iex> delete_transaction(transaction)
-      {:ok, %Transaction{}}
-
-      iex> delete_transaction(transaction)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec delete_transaction(transaction :: Transaction.t()) ::
-          {:ok, Transaction.t()} | {:error, Ecto.Changeset.t()}
-  def delete_transaction(%Transaction{} = transaction) do
-    Repo.delete(transaction)
   end
 
   @doc """

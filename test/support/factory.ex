@@ -1,4 +1,4 @@
-defmodule ExpenseTracker.Factories do
+defmodule ExpenseTracker.Factory do
   @moduledoc """
   Module to generate test data
   """
@@ -8,7 +8,7 @@ defmodule ExpenseTracker.Factories do
     %ExpenseTracker.Tracker.Budget{
       name: "Test Budget",
       description: "This is a test budget",
-      amount: Decimal.new("100.00"),
+      amount: Decimal.new("2000.00"),
       currency: "USD"
     }
   end
@@ -18,7 +18,7 @@ defmodule ExpenseTracker.Factories do
 
     %ExpenseTracker.Tracker.Transaction{
       type: "funding",
-      amount: Money.new(100, "USD"),
+      amount: Money.new(:USD, "100.00"),
       occurred_at: date,
       budget: build(:budget),
       description: "Test transaction"
