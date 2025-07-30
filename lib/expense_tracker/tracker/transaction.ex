@@ -50,14 +50,14 @@ defmodule ExpenseTracker.Tracker.Transaction do
   defp validate_amount(%{valid?: false} = changeset), do: changeset
 
   defp validate_amount(changeset) do
-    amount = get_field(changeset, :amount)
+    amount = get_field(changeset, :amount_value)
 
-    if Money.compare(amount, Money.new(0, amount.currency)) in [:lt, :eq],
-      do: add_error(changeset, :amount, "Amount must be greater than 0"),
+    if Decimal.compare(amount, Decimal.new(0)) in [:lt, :eq],
+      do: add_error(changeset, :amount_value, "Amount must be greater than 0"),
       else: changeset
   end
 
-  defp put_money_amount(%{valid?: true, changes: %{amount_value: amount} = changes} = changeset) do
+  defp put_money_amount(%{valid?: true, changes: %{amount_value: amount}} = changeset) do
     put_change(changeset, :amount, Money.new(amount, :USD))
   end
 

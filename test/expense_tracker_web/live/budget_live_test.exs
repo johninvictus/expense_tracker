@@ -4,7 +4,7 @@ defmodule ExpenseTrackerWeb.BudgetLiveTest do
   import Phoenix.LiveViewTest
   import ExpenseTracker.TrackerFixtures
 
-  @create_attrs %{name: "some name", description: "some description", amount: "120.5"}
+  @create_attrs %{name: "some unique name #{System.unique_integer([:positive])}", description: "some description", amount: "120.5"}
   @update_attrs %{name: "some updated name", description: "some updated description", amount: "456.7"}
   @invalid_attrs %{name: nil, description: nil, amount: nil}
 
@@ -43,7 +43,7 @@ defmodule ExpenseTrackerWeb.BudgetLiveTest do
 
       html = render(index_live)
       assert html =~ "Budget created successfully"
-      assert html =~ "some name"
+      assert html =~ "some unique name"
     end
 
     test "updates budget in listing", %{conn: conn, budget: budget} do
