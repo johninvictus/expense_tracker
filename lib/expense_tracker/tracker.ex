@@ -50,6 +50,7 @@ defmodule ExpenseTracker.Tracker do
       {:error, %Ecto.Changeset{}}
 
   """
+  @spec create_budget(attrs :: map()) :: {:ok, Budget.t()} | {:error, Ecto.Changeset.t()}
   def create_budget(attrs \\ %{}) do
     %Budget{}
     |> Budget.changeset(attrs)
@@ -90,6 +91,49 @@ defmodule ExpenseTracker.Tracker do
     Repo.delete(budget)
   end
 
+  @spec budget_summary(budget_id :: integer(), year :: integer(), month :: integer()) :: %{
+          budget_id: integer(),
+          budget_limit: Money.t(),
+          currency: :string,
+          total_funding: Money.t(),
+          total_spending: Money.t(),
+          transaction_count: integer()
+        }
+  def budget_summary(budget_id, year, month) do
+    base_query = from t in Transaction, where: t.budget_id == ^budget_id
+
+    query =
+      from t in base_query,
+        join: b in Budget, on: b.id == t.budget_id,
+        where: fragment("EXTRACT(year FROM ?)", t.occurred_at) == ^year and fragment("EXTRACT(month FROM ?)", t.occurred_at) == ^month,
+        group_by: [t.budget_id, b.amount, b.currency],
+        select: %{
+          budget_id: t.budget_id,
+          budget_limit: b.amount,
+          currency: b.currency,
+          total_funding:
+            sum(fragment("CASE WHEN ? = 'funding' THEN ((?).amount) ELSE 0 END", t.type, t.amount)),
+          total_spending:
+            sum(fragment("CASE WHEN ? = 'spending' THEN ((?).amount) ELSE 0 END", t.type, t.amount)),
+          transaction_count: count(t.id)
+        }
+
+    case Repo.one(query) do
+      nil -> %{}
+      summary ->
+        total_income = Money.new!(summary.currency, summary.total_funding)
+        total_expenses = Money.new!(summary.currency, summary.total_spending)
+        net_amount = Money.sub!(total_income, total_expenses)
+        budget_limit = Money.new!(summary.currency, summary.budget_limit)
+
+        summary
+        |> Map.put(:total_income, total_income)
+        |> Map.put(:total_expenses, total_expenses)
+        |> Map.put(:net_amount, net_amount)
+        |> Map.put(:budget_limit, budget_limit)
+    end
+  end
+
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking budget changes.
 
@@ -126,15 +170,15 @@ defmodule ExpenseTracker.Tracker do
       [%Transaction{}, ...]
 
   """
-  @spec list_transactions_by_budget_id_and_year_month(id :: integer(), year :: integer(), month :: integer()) :: [Transaction.t()]
+  @spec list_transactions_by_budget_id_and_year_month(
+          id :: integer(),
+          year :: integer(),
+          month :: integer()
+        ) :: [Transaction.t()]
   def list_transactions_by_budget_id_and_year_month(id, year, month) do
-    base_query = from t in Transaction, where: t.budget_id == ^id
+    base_query = from t in Transaction, where: t.budget_id == ^id, order_by: [desc: t.occurred_at]
 
-    query =
-      from t in base_query,
-        where:
-          fragment("EXTRACT(year FROM ?)", t.occurred_at) == ^year and
-            fragment("EXTRACT(month FROM ?)", t.occurred_at) == ^month
+    query = filter_transaction_year_month_filter(base_query, year, month)
 
     Repo.all(query)
   end
@@ -243,5 +287,12 @@ defmodule ExpenseTracker.Tracker do
   @spec change_transaction(transaction :: Transaction.t(), attrs :: map()) :: Ecto.Changeset.t()
   def change_transaction(%Transaction{} = transaction, attrs \\ %{}) do
     Transaction.changeset(transaction, attrs)
+  end
+
+  defp filter_transaction_year_month_filter(query, year, month) do
+    from t in query,
+      where:
+        fragment("EXTRACT(year FROM ?)", t.occurred_at) == ^year and
+          fragment("EXTRACT(month FROM ?)", t.occurred_at) == ^month
   end
 end

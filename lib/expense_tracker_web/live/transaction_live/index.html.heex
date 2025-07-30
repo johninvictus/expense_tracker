@@ -1,18 +1,20 @@
 <!-- Month Picker and Summary Card -->
 <div class="mb-8">
   <div class="flex justify-end mb-4">
-    <div class="flex items-center gap-2">
-      <label for="month-picker" class="text-sm font-medium text-gray-700">Month:</label>
-      <input
-        type="month"
-        id="month-picker"
-        value={@year_month_str}
-        phx-change="update_monthx"
-        class="rounded-md border-gray-300 shadow-sm focus:border-zinc-400 focus:ring-zinc-400 sm:text-sm"
-      />
-    </div>
+    <form phx-change="update_month_event">
+      <div class="flex items-center gap-2">
+        <label for="month-picker" class="text-sm font-medium text-gray-700">Month:</label>
+        <input
+          type="month"
+          id="month-picker"
+          name="month"
+          value={@year_month_str}
+          class="rounded-md border-gray-300 shadow-sm focus:border-zinc-400 focus:ring-zinc-400 sm:text-sm"
+        />
+      </div>
+    </form>
   </div>
-  
+
   <.summary_card
     title="Financial Summary"
     total_income={@total_income}
