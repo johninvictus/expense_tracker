@@ -1,3 +1,14 @@
+<!-- Summary Card -->
+<.summary_card
+  title="Financial Summary"
+  month={@month}
+  total_income={@total_income}
+  total_expenses={@total_expenses}
+  net_amount={@net_amount}
+  transaction_count={@transaction_count}
+  class="mb-8"
+/>
+
 <.header>
   Listing Transactions
   <:actions>
@@ -13,25 +24,12 @@
   row_click={fn {_id, transaction} -> JS.navigate(~p"/transactions/#{transaction}") end}
 >
   <:col :let={{_id, transaction}} label="Type">{transaction.type}</:col>
+  <:col :let={{_id, transaction}} label="Date">{transaction.occurred_at}</:col>
+  <:col :let={{_id, transaction}} label="Description">{transaction.description}</:col>
+  <:col :let={{_id, transaction}} label="Notes">{transaction.notes}</:col>
   <:col :let={{_id, transaction}} label="Amount">
     {Money.to_string!(transaction.amount, locale: "en")}
   </:col>
-  <:col :let={{_id, transaction}} label="Description">{transaction.description}</:col>
-  <:col :let={{_id, transaction}} label="Notes">{transaction.notes}</:col>
-  <:action :let={{_id, transaction}}>
-    <div class="sr-only">
-      <.link navigate={~p"/transactions/#{transaction}"}>Show</.link>
-    </div>
-    <.link patch={~p"/transactions/#{transaction}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={{id, transaction}}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: transaction.id}) |> hide("##{id}")}
-      data-confirm="Are you sure?"
-    >
-      Delete
-    </.link>
-  </:action>
 </.table>
 
 <.modal

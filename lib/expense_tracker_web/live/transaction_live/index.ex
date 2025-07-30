@@ -6,13 +6,18 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
 
   alias ExpenseTracker.Tracker
   alias ExpenseTracker.Tracker.Transaction
+  alias ExpenseTracker.Utils.DateUtils
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
+    # Set default date range: today as start, +30 days as end
+
     socket =
       socket
       |> assign(:budget_id, id)
+      |> assign(:month, DateUtils.get_current_month())
       |> stream(:transactions, Tracker.list_transactions_by_budget_id(id))
+      |> calculate_summary()
 
     {:ok, socket}
   end
@@ -50,6 +55,53 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
     transaction = Tracker.get_transaction!(id)
     {:ok, _} = Tracker.delete_transaction(transaction)
 
-    {:noreply, stream_delete(socket, :transactions, transaction)}
+    {:noreply, stream_delete(socket, :transactions, transaction) |> calculate_summary()}
+  end
+
+  @impl true
+  def handle_event("update_start_date", %{"value" => start_date}, socket) do
+    # Parse the start date and calculate end date (start + 30 days)
+    case Date.from_iso8601(start_date) do
+      {:ok, start_date_parsed} ->
+        end_date = Date.add(start_date_parsed, 30)
+        socket =
+          socket
+          |> assign(:start_date, start_date)
+          |> assign(:end_date, Date.to_string(end_date))
+          |> calculate_summary()
+        {:noreply, socket}
+
+      {:error, _} ->
+        {:noreply, socket}
+    end
+  end
+
+  defp calculate_summary(socket) do
+    %{budget_id: budget_id} = socket.assigns
+
+    # Get filtered transactions
+    # transactions = Tracker.list_transactions_by_budget_id_and_date_range(budget_id, start_date_parsed, end_date_parsed)
+    transactions = Tracker.list_transactions_by_budget_id(budget_id)
+
+    # Calculate totals
+    {total_income, total_expenses} =
+      Enum.reduce(transactions, {Money.new(:USD, 0), Money.new(:USD, 0)}, fn transaction, {income, expenses} ->
+        case transaction.type do
+          :funding -> {Money.add!(income, transaction.amount), expenses}
+          :spending -> {income, Money.add!(expenses, transaction.amount)}
+          _ -> {income, expenses}
+        end
+      end)
+
+    # Calculate net amount (income - expenses)
+    negative_expenses = Money.mult!(total_expenses, -1)
+    net_amount = Money.add!(total_income, negative_expenses)
+
+    socket
+    |> assign(:total_income, Money.to_string!(total_income))
+    |> assign(:total_expenses, Money.to_string!(total_expenses))
+    |> assign(:net_amount, Money.to_string!(net_amount))
+    |> assign(:transaction_count, length(transactions))
+    |> stream(:transactions, transactions, reset: true)
   end
 end

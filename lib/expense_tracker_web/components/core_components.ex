@@ -673,4 +673,73 @@ defmodule ExpenseTrackerWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  @doc """
+  Renders a summary card with financial metrics and date filter.
+  """
+  attr :title, :string, required: true
+  attr :month, :string, required: true
+  attr :total_income, :string, required: true
+  attr :total_expenses, :string, required: true
+  attr :net_amount, :string, required: true
+  attr :transaction_count, :integer, required: true
+  attr :class, :string, default: nil
+
+  def summary_card(assigns) do
+    ~H"""
+    <div class={["bg-white rounded-lg shadow-sm border border-gray-200 p-6", @class]}>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">{@title}</h2>
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2">
+            <.icon name="hero-calendar-days" class="h-4 w-4 text-gray-500" />
+            <label class="text-sm text-gray-500">month:</label>
+            <input
+              type="month"
+              value={@month}
+              phx-change="update_start_date"
+              class="text-sm border-gray-300 rounded-md focus:ring-zinc-400 focus:border-zinc-400"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="bg-green-50 rounded-lg p-4">
+          <div class="flex items-center">
+            <.icon name="hero-arrow-trending-up" class="h-5 w-5 text-green-600 mr-2" />
+            <div>
+              <p class="text-sm font-medium text-green-900">Total Income</p>
+              <p class="text-lg font-semibold text-green-600">{@total_income}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-red-50 rounded-lg p-4">
+          <div class="flex items-center">
+            <.icon name="hero-arrow-trending-down" class="h-5 w-5 text-red-600 mr-2" />
+            <div>
+              <p class="text-sm font-medium text-red-900">Total Expenses</p>
+              <p class="text-lg font-semibold text-red-600">{@total_expenses}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+        <div>
+          <p class="text-sm text-gray-500">Net Amount</p>
+          <p class={[
+            "text-xl font-bold",
+            String.starts_with?(@net_amount, "-") && "text-red-600" || "text-green-600"
+          ]}>{@net_amount}</p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-gray-500">Transactions</p>
+          <p class="text-lg font-semibold text-gray-900">{@transaction_count}</p>
+        </div>
+      </div>
+    </div>
+    """
+  end
 end

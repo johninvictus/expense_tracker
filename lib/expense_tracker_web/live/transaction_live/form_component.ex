@@ -1,5 +1,4 @@
 defmodule ExpenseTrackerWeb.TransactionLive.FormComponent do
-  alias ExpenseTracker.Cldr.Money
   use ExpenseTrackerWeb, :live_component
 
   alias ExpenseTracker.Tracker
