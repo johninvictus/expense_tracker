@@ -55,19 +55,16 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
         socket
       ) do
     socket =
-      socket
-      |> stream_insert(:transactions, transaction)
-      |> calculate_summary()
+      if transaction.occurred_at.month == socket.assigns.month and
+           transaction.occurred_at.year == socket.assigns.year do
+        socket
+        |> stream_insert(:transactions, transaction)
+        |> calculate_summary()
+      else
+        socket
+      end
 
     {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    transaction = Tracker.get_transaction!(id)
-    {:ok, _} = Tracker.delete_transaction(transaction)
-
-    {:noreply, stream_delete(socket, :transactions, transaction) |> calculate_summary()}
   end
 
   @impl true
@@ -94,7 +91,11 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
     stream(
       socket,
       :transactions,
-      Tracker.list_transactions_by_budget_id_and_year_month(socket.assigns.budget_id, socket.assigns.year, socket.assigns.month),
+      Tracker.list_transactions_by_budget_id_and_year_month(
+        socket.assigns.budget_id,
+        socket.assigns.year,
+        socket.assigns.month
+      ),
       reset: true
     )
   end
