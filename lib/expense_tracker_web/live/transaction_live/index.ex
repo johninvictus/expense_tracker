@@ -79,8 +79,8 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
   defp calculate_summary(socket) do
     %{budget_id: budget_id} = socket.assigns
 
-    # Get filtered transactions
-    # transactions = Tracker.list_transactions_by_budget_id_and_date_range(budget_id, start_date_parsed, end_date_parsed)
+    # Get budget and transactions
+    budget = Tracker.get_budget!(budget_id)
     transactions = Tracker.list_transactions_by_budget_id(budget_id)
 
     # Calculate totals
@@ -97,10 +97,14 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
     negative_expenses = Money.mult!(total_expenses, -1)
     net_amount = Money.add!(total_income, negative_expenses)
 
+    # Convert budget amount to Money for consistent formatting
+    budget_limit = Money.new(budget.currency, budget.amount)
+
     socket
     |> assign(:total_income, Money.to_string!(total_income))
     |> assign(:total_expenses, Money.to_string!(total_expenses))
     |> assign(:net_amount, Money.to_string!(net_amount))
+    |> assign(:budget_limit, Money.to_string!(budget_limit))
     |> assign(:transaction_count, length(transactions))
     |> stream(:transactions, transactions, reset: true)
   end

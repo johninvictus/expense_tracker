@@ -5,6 +5,7 @@
   total_income={@total_income}
   total_expenses={@total_expenses}
   net_amount={@net_amount}
+  budget_limit={@budget_limit}
   transaction_count={@transaction_count}
   class="mb-8"
 />
@@ -18,11 +19,7 @@
   </:actions>
 </.header>
 
-<.table
-  id="transactions"
-  rows={@streams.transactions}
-  row_click={fn {_id, transaction} -> JS.navigate(~p"/transactions/#{transaction}") end}
->
+<.table id="transactions" rows={@streams.transactions}>
   <:col :let={{_id, transaction}} label="Type">{transaction.type}</:col>
   <:col :let={{_id, transaction}} label="Date">{transaction.occurred_at}</:col>
   <:col :let={{_id, transaction}} label="Description">{transaction.description}</:col>

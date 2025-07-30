@@ -682,10 +682,31 @@ defmodule ExpenseTrackerWeb.CoreComponents do
   attr :total_income, :string, required: true
   attr :total_expenses, :string, required: true
   attr :net_amount, :string, required: true
+  attr :budget_limit, :string, required: true
   attr :transaction_count, :integer, required: true
   attr :class, :string, default: nil
 
   def summary_card(assigns) do
+    # Parse money strings to extract numeric values for progress calculation
+    expenses_value = parse_money_string(assigns.total_expenses)
+    limit_value = parse_money_string(assigns.budget_limit)
+
+    # Calculate progress percentage (expenses / limit * 100)
+    progress_percentage = if limit_value > 0 do
+      min(100, (expenses_value / limit_value * 100) |> Float.round(1))
+    else
+      0
+    end
+
+    # Determine progress bar color based on percentage
+    progress_color = cond do
+      progress_percentage >= 90 -> "bg-red-500"
+      progress_percentage >= 70 -> "bg-yellow-500"
+      true -> "bg-green-500"
+    end
+
+    assigns = assign(assigns, progress_percentage: progress_percentage, progress_color: progress_color)
+
     ~H"""
     <div class={["bg-white rounded-lg shadow-sm border border-gray-200 p-6", @class]}>
       <div class="flex items-center justify-between mb-4">
@@ -726,20 +747,42 @@ defmodule ExpenseTrackerWeb.CoreComponents do
         </div>
       </div>
 
-      <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-        <div>
-          <p class="text-sm text-gray-500">Net Amount</p>
-          <p class={[
-            "text-xl font-bold",
-            String.starts_with?(@net_amount, "-") && "text-red-600" || "text-green-600"
-          ]}>{@net_amount}</p>
+      <div class="pt-4 border-t border-gray-200">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-sm text-gray-500">Budget Progress</p>
+          <p class="text-sm text-gray-500">{@progress_percentage}%</p>
         </div>
-        <div class="text-right">
+
+        <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+          <div class={["h-4 rounded-full transition-all duration-300", @progress_color]} style={"width: #{@progress_percentage}%"}></div>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <div>
+            <span class="text-gray-600">Spent: </span>
+            <span class="font-semibold text-red-600">{@total_expenses}</span>
+          </div>
+          <div>
+            <span class="text-gray-600">Limit: </span>
+            <span class="font-semibold text-gray-900">{@budget_limit}</span>
+          </div>
+        </div>
+
+        <div class="text-right mt-2">
           <p class="text-sm text-gray-500">Transactions</p>
           <p class="text-lg font-semibold text-gray-900">{@transaction_count}</p>
         </div>
       </div>
     </div>
     """
+  end
+
+  # Helper function to parse money strings and extract numeric values
+  defp parse_money_string(money_string) do
+    money_string
+    |> String.replace(["$", ",", "€", "£"], "")
+    |> String.to_float()
+  rescue
+    _ -> 0.0
   end
 end
