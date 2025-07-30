@@ -15,7 +15,7 @@ defmodule ExpenseTracker.BudgetTest do
     changeset =
       Budget.changeset(%Budget{}, %{
         name: "Test",
-        amount: Money.new!(-1, "USD"),
+        amount: -1,
         description: "Test"
       })
 
@@ -26,10 +26,34 @@ defmodule ExpenseTracker.BudgetTest do
     changeset =
       Budget.changeset(%Budget{}, %{
         name: "Test",
-        amount: Money.new!(0, "USD"),
+        amount: 0,
         description: "Test"
       })
 
     assert errors_on(changeset)[:amount] == ["Amount must be greater than 0"]
+  end
+
+  test "validates currency - invalid currency" do
+    changeset =
+      Budget.changeset(%Budget{}, %{
+        name: "Test",
+        amount: 1,
+        description: "Test",
+        currency: "PXS"
+      })
+
+    assert errors_on(changeset)[:currency] == ["is invalid"]
+  end
+
+  test "valid params" do
+    changeset =
+      Budget.changeset(%Budget{}, %{
+        name: "Test",
+        amount: 1,
+        description: "Test",
+        currency: "USD"
+      })
+
+    assert changeset.valid?
   end
 end

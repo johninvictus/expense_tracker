@@ -9,20 +9,23 @@ defmodule ExpenseTracker.Tracker.Budget do
           id: integer(),
           name: String.t(),
           description: String.t(),
-          amount: Money.t(),
+          amount: :decimal,
+          currency: :string,
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
         }
   schema "budgets" do
     field :name, :string
     field :description, :string
-    field :amount, Money.Ecto.Composite.Type
+
+    field :amount, :decimal
+    field :currency, :string, default: "USD"
 
     timestamps(type: :utc_datetime)
   end
 
   @required_field ~w(name amount description)a
-  @optional_field ~w()a
+  @optional_field ~w(currency)a
 
   @doc false
   @spec changeset(budget :: t(), attrs :: map()) :: Ecto.Changeset.t()
@@ -30,6 +33,7 @@ defmodule ExpenseTracker.Tracker.Budget do
     budget
     |> cast(attrs, @required_field ++ @optional_field)
     |> validate_required(@required_field)
+    |> validate_inclusion(:currency, ["USD", "EUR", "GBP"])
     |> validate_amount()
   end
 
@@ -38,7 +42,7 @@ defmodule ExpenseTracker.Tracker.Budget do
   defp validate_amount(changeset) do
     amount = get_field(changeset, :amount)
 
-    if Money.compare(amount, Money.new(0, amount.currency)) in [:lt, :eq],
+    if Decimal.compare(amount, Decimal.new(0)) in [:lt, :eq],
       do: add_error(changeset, :amount, "Amount must be greater than 0"),
       else: changeset
   end

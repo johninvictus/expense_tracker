@@ -20,7 +20,7 @@ defmodule ExpenseTrackerWeb.BudgetLive.FormComponent do
         phx-submit="save"
       >
         <.input field={@form[:name]} type="text" label="Name" />
-        <.input field={@form[:amount]} type="number" label="Amount" step="any" />
+        <.input field={@form[:amount]} type="number" label="Amount ($)" step="any" />
         <.input field={@form[:description]} type="text" label="Description" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Budget</.button>

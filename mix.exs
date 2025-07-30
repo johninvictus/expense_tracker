@@ -60,7 +60,9 @@ defmodule ExpenseTracker.MixProject do
       {:bandit, "~> 1.5"},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:ex_money, "~> 5.17"},
-      {:ex_money_sql, "~> 1.11"}
+      {:ex_money_sql, "~> 1.11"},
+      {:ex_cldr, "~> 2.40"},
+      {:ex_cldr_numbers, "~> 2.33"}
     ]
   end
 
