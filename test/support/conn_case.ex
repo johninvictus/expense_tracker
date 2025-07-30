@@ -28,6 +28,7 @@ defmodule ExpenseTrackerWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import ExpenseTrackerWeb.ConnCase
+      import ExpenseTracker.Factory
     end
   end
 

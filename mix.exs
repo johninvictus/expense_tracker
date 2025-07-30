@@ -72,7 +72,8 @@ defmodule ExpenseTracker.MixProject do
       {:ex_cldr, "~> 2.40"},
       {:ex_cldr_numbers, "~> 2.33"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.18", only: :test}
+      {:excoveralls, "~> 0.18", only: :test},
+      {:ex_machina, "~> 2.8.0", only: :test}
     ]
   end
 

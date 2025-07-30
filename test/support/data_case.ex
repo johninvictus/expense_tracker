@@ -24,6 +24,7 @@ defmodule ExpenseTracker.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import ExpenseTracker.DataCase
+      import ExpenseTracker.Factory
     end
   end
 

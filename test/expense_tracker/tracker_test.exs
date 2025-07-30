@@ -65,4 +65,17 @@ defmodule ExpenseTracker.TrackerTest do
       assert %Ecto.Changeset{} = Tracker.change_budget(budget)
     end
   end
+
+  describe "transactions" do
+    alias ExpenseTracker.Tracker.Transaction
+
+    import ExpenseTracker.TrackerFixtures
+
+    @invalid_attrs %{type: nil, amount_value: nil, occurred_at: nil, budget_id: nil, description: nil}
+
+    test "list_transactions/0 returns all transactions" do
+      transaction = transaction_fixture()
+      assert Tracker.list_transactions() == [transaction]
+    end
+  end
 end

@@ -1,4 +1,6 @@
 defmodule ExpenseTracker.TransactionTest do
+  @moduledoc false
+
   use ExpenseTracker.DataCase
 
   alias ExpenseTracker.Tracker.Transaction
