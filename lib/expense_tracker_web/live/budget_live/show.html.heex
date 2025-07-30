@@ -2,8 +2,8 @@
   Budget {@budget.id}
   <:subtitle>This is a budget record from your database.</:subtitle>
   <:actions>
-    <.link patch={~p"/budgets/#{@budget}/show/edit"} phx-click={JS.push_focus()}>
-      <.button>Edit budget</.button>
+    <.link patch={~p"/budgets/#{@budget.id}/transactions/new"} phx-click={JS.push_focus()}>
+      <.button>Add transaction</.button>
     </.link>
   </:actions>
 </.header>
