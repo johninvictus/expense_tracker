@@ -1,14 +1,28 @@
-<!-- Summary Card -->
-<.summary_card
-  title="Financial Summary"
-  month={@month}
-  total_income={@total_income}
-  total_expenses={@total_expenses}
-  net_amount={@net_amount}
-  budget_limit={@budget_limit}
-  transaction_count={@transaction_count}
-  class="mb-8"
-/>
+<!-- Month Picker and Summary Card -->
+<div class="mb-8">
+  <div class="flex justify-end mb-4">
+    <div class="flex items-center gap-2">
+      <label for="month-picker" class="text-sm font-medium text-gray-700">Month:</label>
+      <input
+        type="month"
+        id="month-picker"
+        value={@month}
+        phx-change="update_month"
+        class="rounded-md border-gray-300 shadow-sm focus:border-zinc-400 focus:ring-zinc-400 sm:text-sm"
+      />
+    </div>
+  </div>
+  
+  <.summary_card
+    title="Financial Summary"
+    month={@month}
+    total_income={@total_income}
+    total_expenses={@total_expenses}
+    net_amount={@net_amount}
+    budget_limit={@budget_limit}
+    transaction_count={@transaction_count}
+  />
+</div>
 
 <.header>
   Listing Transactions

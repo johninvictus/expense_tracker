@@ -711,18 +711,6 @@ defmodule ExpenseTrackerWeb.CoreComponents do
     <div class={["bg-white rounded-lg shadow-sm border border-gray-200 p-6", @class]}>
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-900">{@title}</h2>
-        <div class="flex items-center space-x-4">
-          <div class="flex items-center space-x-2">
-            <.icon name="hero-calendar-days" class="h-4 w-4 text-gray-500" />
-            <label class="text-sm text-gray-500">month:</label>
-            <input
-              type="month"
-              value={@month}
-              phx-change="update_start_date"
-              class="text-sm border-gray-300 rounded-md focus:ring-zinc-400 focus:border-zinc-400"
-            />
-          </div>
-        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-4 mb-4">

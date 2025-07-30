@@ -59,6 +59,15 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
   end
 
   @impl true
+  def handle_event("update_month", %{"value" => month}, socket) do
+    socket =
+      socket
+      |> assign(:month, month)
+      |> calculate_summary()
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("update_start_date", %{"value" => start_date}, socket) do
     # Parse the start date and calculate end date (start + 30 days)
     case Date.from_iso8601(start_date) do
