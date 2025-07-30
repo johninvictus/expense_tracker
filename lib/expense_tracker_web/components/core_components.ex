@@ -678,7 +678,6 @@ defmodule ExpenseTrackerWeb.CoreComponents do
   Renders a summary card with financial metrics and date filter.
   """
   attr :title, :string, required: true
-  attr :month, :string, required: true
   attr :total_income, :string, required: true
   attr :total_expenses, :string, required: true
   attr :net_amount, :string, required: true

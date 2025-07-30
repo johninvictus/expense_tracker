@@ -118,6 +118,28 @@ defmodule ExpenseTracker.Tracker do
   end
 
   @doc """
+  Returns the list of transactions for a given budget within a year and month.
+
+  ## Examples
+
+      iex> list_transactions_by_budget_id_and_year_month(1, 2025, 1)
+      [%Transaction{}, ...]
+
+  """
+  @spec list_transactions_by_budget_id_and_year_month(id :: integer(), year :: integer(), month :: integer()) :: [Transaction.t()]
+  def list_transactions_by_budget_id_and_year_month(id, year, month) do
+    base_query = from t in Transaction, where: t.budget_id == ^id
+
+    query =
+      from t in base_query,
+        where:
+          fragment("EXTRACT(year FROM ?)", t.occurred_at) == ^year and
+            fragment("EXTRACT(month FROM ?)", t.occurred_at) == ^month
+
+    Repo.all(query)
+  end
+
+  @doc """
   Returns the list of transactions for a given budget within a date range.
 
   ## Examples
@@ -126,12 +148,16 @@ defmodule ExpenseTracker.Tracker do
       [%Transaction{}, ...]
 
   """
-  @spec list_transactions_by_budget_id_and_date_range(id :: integer(), start_date :: Date.t(), end_date :: Date.t()) :: [Transaction.t()]
+  @spec list_transactions_by_budget_id_and_date_range(
+          id :: integer(),
+          start_date :: Date.t(),
+          end_date :: Date.t()
+        ) :: [Transaction.t()]
   def list_transactions_by_budget_id_and_date_range(id, start_date, end_date) do
     Repo.all(
       from t in Transaction,
-      where: t.budget_id == ^id and t.occurred_at >= ^start_date and t.occurred_at <= ^end_date,
-      order_by: [desc: t.occurred_at]
+        where: t.budget_id == ^id and t.occurred_at >= ^start_date and t.occurred_at <= ^end_date,
+        order_by: [desc: t.occurred_at]
     )
   end
 
@@ -199,7 +225,8 @@ defmodule ExpenseTracker.Tracker do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_transaction(transaction :: Transaction.t()) :: {:ok, Transaction.t()} | {:error, Ecto.Changeset.t()}
+  @spec delete_transaction(transaction :: Transaction.t()) ::
+          {:ok, Transaction.t()} | {:error, Ecto.Changeset.t()}
   def delete_transaction(%Transaction{} = transaction) do
     Repo.delete(transaction)
   end

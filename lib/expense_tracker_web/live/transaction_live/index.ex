@@ -12,11 +12,18 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
   def mount(%{"id" => id}, _session, socket) do
     # Set default date range: today as start, +30 days as end
 
+    date_now = Date.utc_today()
+
     socket =
       socket
       |> assign(:budget_id, id)
-      |> assign(:month, DateUtils.get_current_month())
-      |> stream(:transactions, Tracker.list_transactions_by_budget_id(id))
+      |> assign(:month, date_now.month)
+      |> assign(:year, date_now.year)
+      |> assign(:year_month_str, DateUtils.get_current_month(date_now))
+      |> stream(
+        :transactions,
+        Tracker.list_transactions_by_budget_id_and_year_month(id, date_now.year, date_now.month)
+      )
       |> calculate_summary()
 
     {:ok, socket}
@@ -46,7 +53,10 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
   end
 
   @impl true
-  def handle_info({ExpenseTrackerWeb.TransactionLive.FormComponent, {:saved, transaction}}, socket) do
+  def handle_info(
+        {ExpenseTrackerWeb.TransactionLive.FormComponent, {:saved, transaction}},
+        socket
+      ) do
     {:noreply, stream_insert(socket, :transactions, transaction)}
   end
 
@@ -60,10 +70,13 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
 
   @impl true
   def handle_event("update_month", %{"value" => month}, socket) do
-    socket =
-      socket
-      |> assign(:month, month)
-      |> calculate_summary()
+    IO.inspect(month, label: "month")
+
+    # socket =
+    #   socket
+    #   |> assign(:month, month)
+    #   |> calculate_summary()
+
     {:noreply, socket}
   end
 
@@ -73,11 +86,13 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
     case Date.from_iso8601(start_date) do
       {:ok, start_date_parsed} ->
         end_date = Date.add(start_date_parsed, 30)
+
         socket =
           socket
           |> assign(:start_date, start_date)
           |> assign(:end_date, Date.to_string(end_date))
           |> calculate_summary()
+
         {:noreply, socket}
 
       {:error, _} ->
@@ -94,7 +109,8 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
 
     # Calculate totals
     {total_income, total_expenses} =
-      Enum.reduce(transactions, {Money.new(:USD, 0), Money.new(:USD, 0)}, fn transaction, {income, expenses} ->
+      Enum.reduce(transactions, {Money.new(:USD, 0), Money.new(:USD, 0)}, fn transaction,
+                                                                             {income, expenses} ->
         case transaction.type do
           :funding -> {Money.add!(income, transaction.amount), expenses}
           :spending -> {income, Money.add!(expenses, transaction.amount)}
@@ -115,6 +131,7 @@ defmodule ExpenseTrackerWeb.TransactionLive.Index do
     |> assign(:net_amount, Money.to_string!(net_amount))
     |> assign(:budget_limit, Money.to_string!(budget_limit))
     |> assign(:transaction_count, length(transactions))
-    |> stream(:transactions, transactions, reset: true)
+
+    # |> stream(:transactions, transactions, reset: true)
   end
 end
