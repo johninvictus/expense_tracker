@@ -10,7 +10,7 @@
 <.table
   id="budgets"
   rows={@streams.budgets}
-  row_click={fn {_id, budget} -> JS.navigate(~p"/budgets/#{budget}") end}
+  row_click={fn {_id, budget} -> JS.navigate(~p"/budgets/#{budget}/transactions") end}
 >
   <:col :let={{_id, budget}} label="Name">{budget.name}</:col>
   <:col :let={{_id, budget}} label="Amount">
@@ -19,7 +19,7 @@
   <:col :let={{_id, budget}} label="Description">{budget.description}</:col>
   <:action :let={{_id, budget}}>
     <div class="sr-only">
-      <.link navigate={~p"/budgets/#{budget}"}>Show</.link>
+      <.link navigate={~p"/budgets/#{budget}/transactions"}>Show</.link>
     </div>
     <.link patch={~p"/budgets/#{budget}/edit"}>Edit</.link>
   </:action>
