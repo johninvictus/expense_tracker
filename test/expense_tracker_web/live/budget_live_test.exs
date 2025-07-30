@@ -4,8 +4,16 @@ defmodule ExpenseTrackerWeb.BudgetLiveTest do
   import Phoenix.LiveViewTest
   import ExpenseTracker.TrackerFixtures
 
-  @create_attrs %{name: "some unique name #{System.unique_integer([:positive])}", description: "some description", amount: "120.5"}
-  @update_attrs %{name: "some updated name", description: "some updated description", amount: "456.7"}
+  @create_attrs %{
+    name: "some unique name #{System.unique_integer([:positive])}",
+    description: "some description",
+    amount: "120.5"
+  }
+  @update_attrs %{
+    name: "some updated name",
+    description: "some updated description",
+    amount: "456.7"
+  }
   @invalid_attrs %{name: nil, description: nil, amount: nil}
 
   defp create_budget(_) do

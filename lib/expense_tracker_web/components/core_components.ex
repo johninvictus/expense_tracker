@@ -691,20 +691,23 @@ defmodule ExpenseTrackerWeb.CoreComponents do
     limit_value = parse_money_string(assigns.budget_limit)
 
     # Calculate progress percentage (expenses / limit * 100)
-    progress_percentage = if limit_value > 0 do
-      min(100, (expenses_value / limit_value * 100) |> Float.round(1))
-    else
-      0
-    end
+    progress_percentage =
+      if limit_value > 0 do
+        min(100, (expenses_value / limit_value * 100) |> Float.round(1))
+      else
+        0
+      end
 
     # Determine progress bar color based on percentage
-    progress_color = cond do
-      progress_percentage >= 90 -> "bg-red-500"
-      progress_percentage >= 70 -> "bg-yellow-500"
-      true -> "bg-green-500"
-    end
+    progress_color =
+      cond do
+        progress_percentage >= 90 -> "bg-red-500"
+        progress_percentage >= 70 -> "bg-yellow-500"
+        true -> "bg-green-500"
+      end
 
-    assigns = assign(assigns, progress_percentage: progress_percentage, progress_color: progress_color)
+    assigns =
+      assign(assigns, progress_percentage: progress_percentage, progress_color: progress_color)
 
     ~H"""
     <div class={["bg-white rounded-lg shadow-sm border border-gray-200 p-6", @class]}>
@@ -741,7 +744,11 @@ defmodule ExpenseTrackerWeb.CoreComponents do
         </div>
 
         <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-          <div class={["h-4 rounded-full transition-all duration-300", @progress_color]} style={"width: #{@progress_percentage}%"}></div>
+          <div
+            class={["h-4 rounded-full transition-all duration-300", @progress_color]}
+            style={"width: #{@progress_percentage}%"}
+          >
+          </div>
         </div>
 
         <div class="flex items-center justify-between text-sm">

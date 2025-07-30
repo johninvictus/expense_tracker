@@ -104,22 +104,31 @@ defmodule ExpenseTracker.Tracker do
 
     query =
       from t in base_query,
-        join: b in Budget, on: b.id == t.budget_id,
-        where: fragment("EXTRACT(year FROM ?)", t.occurred_at) == ^year and fragment("EXTRACT(month FROM ?)", t.occurred_at) == ^month,
+        join: b in Budget,
+        on: b.id == t.budget_id,
+        where:
+          fragment("EXTRACT(year FROM ?)", t.occurred_at) == ^year and
+            fragment("EXTRACT(month FROM ?)", t.occurred_at) == ^month,
         group_by: [t.budget_id, b.amount, b.currency],
         select: %{
           budget_id: t.budget_id,
           budget_limit: b.amount,
           currency: b.currency,
           total_funding:
-            sum(fragment("CASE WHEN ? = 'funding' THEN ((?).amount) ELSE 0 END", t.type, t.amount)),
+            sum(
+              fragment("CASE WHEN ? = 'funding' THEN ((?).amount) ELSE 0 END", t.type, t.amount)
+            ),
           total_spending:
-            sum(fragment("CASE WHEN ? = 'spending' THEN ((?).amount) ELSE 0 END", t.type, t.amount)),
+            sum(
+              fragment("CASE WHEN ? = 'spending' THEN ((?).amount) ELSE 0 END", t.type, t.amount)
+            ),
           transaction_count: count(t.id)
         }
 
     case Repo.one(query) do
-      nil -> %{}
+      nil ->
+        %{}
+
       summary ->
         total_income = Money.new!(summary.currency, summary.total_funding)
         total_expenses = Money.new!(summary.currency, summary.total_spending)

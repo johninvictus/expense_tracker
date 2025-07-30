@@ -35,7 +35,12 @@ defmodule ExpenseTracker.TrackerTest do
 
     test "update_budget/2 with valid data updates the budget" do
       budget = budget_fixture()
-      update_attrs = %{name: "some updated name", description: "some updated description", amount: "456.7"}
+
+      update_attrs = %{
+        name: "some updated name",
+        description: "some updated description",
+        amount: "456.7"
+      }
 
       assert {:ok, %Budget{} = budget} = Tracker.update_budget(budget, update_attrs)
       assert budget.name == "some updated name"

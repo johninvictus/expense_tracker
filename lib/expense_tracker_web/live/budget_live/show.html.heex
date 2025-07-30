@@ -19,7 +19,12 @@
 
 <.back navigate={~p"/budgets"}>Back to budgets</.back>
 
-<.modal :if={@live_action == :edit} id="budget-modal" show on_cancel={JS.patch(~p"/budgets/#{@budget}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="budget-modal"
+  show
+  on_cancel={JS.patch(~p"/budgets/#{@budget}")}
+>
   <.live_component
     module={ExpenseTrackerWeb.BudgetLive.FormComponent}
     id={@budget.id}
